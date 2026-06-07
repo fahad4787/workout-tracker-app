@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FahadFit">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="description" content="FahadFit — Personal workout tracker. Cycle sessions & home workouts for your 103→80kg journey.">
+  <title>FahadFit</title>
+  <link rel="stylesheet" href="css/tailwind.css">
+  <link rel="stylesheet" href="css/custom.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f' width='100' height='100' rx='20'/><text y='.9em' font-size='90'>💪</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>">
+</head>
+<body class="bg-mesh text-white min-h-dvh">
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed top-4 left-4 right-4 z-50 glass-strong rounded-xl p-4 border-l-4 max-w-lg mx-auto"></div>
+
+  <!-- App Container -->
+  <div class="max-w-lg mx-auto app-main">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 glass-strong px-4 py-3">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <h1 id="app-brand" class="font-display text-lg font-bold neon-text leading-tight">FahadFit</h1>
+          <p id="header-journey" class="text-xs text-gray-400 truncate">103 → 80 kg</p>
+        </div>
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <button type="button" id="toggle-sfx" class="header-audio-btn active" title="Sound FX on" aria-label="Toggle sound effects">
+            <span data-icon="zap" data-size="16"></span>
+          </button>
+          <button type="button" id="toggle-coach" class="header-audio-btn active" title="Coach on" aria-label="Toggle coach voice">
+            <span data-icon="activity" data-size="16"></span>
+          </button>
+          <div class="header-streak text-right pl-1">
+            <p class="text-[10px] text-gray-400 leading-none">Streak</p>
+            <p class="font-bold text-orange-400 streak-fire flex items-center justify-end gap-0.5 text-sm leading-tight">
+              <span data-icon="flame" data-size="14"></span>
+              <span id="dash-streak">0</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══ HOME / DASHBOARD ═══ -->
+    <section data-panel="home" class="px-5 pt-4 space-y-5">
+
+      <!-- Greeting -->
+      <div class="fade-in">
+        <h2 id="dash-greeting" class="text-2xl font-bold font-display">Good morning, Fahad</h2>
+        <p id="dash-quote" class="text-sm text-secondary mt-1.5 italic">Loading motivation...</p>
+      </div>
+
+      <!-- Quick start today's workout -->
+      <div id="dash-quick-start" class="quick-start-card glass rounded-2xl p-4 neon-border fade-in">
+        <div class="flex items-center gap-3">
+          <span id="dash-quick-icon" class="quick-start-icon flex-shrink-0"></span>
+          <div class="flex-1 min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-muted">Today's workout</p>
+            <p id="dash-today-workout" class="font-display font-bold text-base text-white truncate">Loading...</p>
+            <p id="dash-today-meta" class="text-xs text-secondary mt-0.5">—</p>
+          </div>
+          <button type="button" id="dash-start-workout" class="btn-neon flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold text-white">
+            Go
+          </button>
+        </div>
+      </div>
+
+      <!-- Weight Progress Ring -->
+      <div class="glass rounded-3xl p-6 neon-border fade-in">
+        <div class="flex items-center gap-6">
+          <div class="relative w-32 h-32 flex-shrink-0">
+            <svg class="progress-ring w-full h-full" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+              <circle id="progress-ring" cx="60" cy="60" r="54" fill="none" stroke="url(#ringGrad)" stroke-width="8" stroke-linecap="round" class="progress-ring-circle"/>
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff2d95"/>
+                  <stop offset="50%" stop-color="#a855f7"/>
+                  <stop offset="100%" stop-color="#00f5ff"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="dash-progress-pct" class="text-2xl font-bold font-display">0%</span>
+              <span class="text-xs text-muted">to goal</span>
+            </div>
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="flex justify-between">
+              <span class="text-secondary text-sm">Current</span>
+              <span class="font-bold text-xl text-white"><span id="dash-weight">103</span> kg</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-secondary text-sm">Target</span>
+              <span class="font-bold text-lime-400"><span id="dash-target">80</span> kg</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-secondary text-sm">Lost</span>
+              <span class="font-bold text-pink-400"><span id="dash-lost">0</span> kg</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-secondary text-sm">Remaining</span>
+              <span class="font-bold text-orange-400"><span id="dash-remaining">23</span> kg</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 grid grid-cols-3 gap-3 text-center">
+          <div class="stat-mini">
+            <p class="label">BMI</p>
+            <p id="dash-bmi" class="value">33.5</p>
+          </div>
+          <div class="stat-mini">
+            <p class="label">Weeks Left</p>
+            <p id="dash-weeks" class="value text-cyan-400">~23</p>
+          </div>
+          <div class="stat-mini">
+            <p class="label">Daily Cal</p>
+            <p id="dash-cal-target" class="value text-lime-400">1800</p>
+          </div>
+        </div>
+        <p class="text-[11px] text-gray-500 text-center mt-4">Log daily weight in <button type="button" id="dash-go-settings" class="text-cyan-400 font-medium hover:text-cyan-300">Settings</button></p>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-3 gap-3 fade-in">
+        <div class="glass rounded-2xl p-3 text-center stat-card">
+          <div class="flex justify-center icon-stat"><span data-icon="dumbbell" data-size="22"></span></div>
+          <p id="dash-sessions" class="font-bold text-lg">0</p>
+          <p class="text-xs text-gray-400">Sessions</p>
+        </div>
+        <div class="glass rounded-2xl p-3 text-center stat-card">
+          <div class="flex justify-center icon-stat text-orange-400"><span data-icon="flame" data-size="22"></span></div>
+          <p id="dash-calories" class="font-bold text-lg">0</p>
+          <p class="text-xs text-gray-400">kcal Burned</p>
+        </div>
+        <div class="glass rounded-2xl p-3 text-center stat-card">
+          <div class="flex justify-center icon-stat text-lime-400"><span data-icon="timer" data-size="22"></span></div>
+          <p id="dash-minutes" class="font-bold text-lg">0</p>
+          <p class="text-xs text-gray-400">Minutes</p>
+        </div>
+      </div>
+
+      <!-- This Week -->
+      <div class="glass rounded-2xl p-4 fade-in">
+        <h3 class="font-display font-semibold mb-3 flex items-center gap-2"><span data-icon="chart" data-size="18"></span> This Week</h3>
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div>
+            <p id="dash-week-sessions" class="font-bold text-pink-400">0</p>
+            <p class="text-xs text-gray-400">Sessions</p>
+          </div>
+          <div>
+            <p id="dash-week-cal" class="font-bold text-cyan-400">0</p>
+            <p class="text-xs text-gray-400">kcal</p>
+          </div>
+          <div>
+            <p id="dash-week-min" class="font-bold text-lime-400">0</p>
+            <p class="text-xs text-gray-400">Minutes</p>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/5">
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-gray-400 flex items-center gap-1"><span data-icon="target" data-size="14"></span> Weekly Power</span>
+            <span id="dash-week-goal-pct" class="text-lime-400 font-bold">0%</span>
+          </div>
+          <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div id="dash-week-goal-bar" class="h-full bg-gradient-to-r from-lime-400 to-cyan-400 rounded-full" style="width:0%"></div>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">Goal: 5 sessions · 2,500 kcal · 300 min</p>
+        </div>
+      </div>
+
+      <!-- Today's Activity -->
+      <div class="glass rounded-2xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-display font-semibold flex items-center gap-2"><span data-icon="calendar" data-size="18"></span> Today</h3>
+          <button id="clear-today-btn" class="hidden text-xs text-red-400 hover:text-red-300 flex items-center gap-1"><span data-icon="trash" data-size="12"></span> Clear all</button>
+        </div>
+        <div id="dash-today-activity"></div>
+      </div>
+    </section>
+
+    <!-- ═══ CYCLE TRACKER ═══ -->
+    <section data-panel="cycle" class="hidden px-5 pt-4 space-y-5">
+
+      <div class="fade-in">
+        <h2 class="text-2xl font-bold font-display flex items-center gap-2"><span data-icon="bike" data-size="24"></span> Cycle Session</h2>
+        <p class="text-sm text-gray-400 mt-1">Track your stationary bike rides</p>
+        <p id="cycle-bg-pause-hint" class="hidden text-xs text-orange-400/90 mt-2">Timer paused while app was in background — tap Resume</p>
+      </div>
+
+      <!-- Timer -->
+      <div class="glass rounded-3xl p-8 text-center neon-border pulse-glow fade-in">
+        <p class="text-sm text-gray-400 uppercase tracking-widest mb-2">Ride Timer</p>
+        <p id="cycle-timer" class="timer-display text-6xl font-bold font-display neon-text">00:00</p>
+        <div class="flex gap-3 justify-center mt-6">
+          <button id="cycle-start" class="btn-neon text-white font-bold px-6 py-3 rounded-xl text-sm flex items-center gap-2"><span data-icon="play" data-size="16"></span><span class="cycle-start-label">Start Ride</span></button>
+          <button id="cycle-pause" disabled class="bg-white/10 text-white font-bold px-6 py-3 rounded-xl text-sm disabled:opacity-30 flex items-center gap-2"><span data-icon="pause" data-size="16"></span> Pause</button>
+          <button id="cycle-reset" class="bg-white/10 text-white font-bold px-4 py-3 rounded-xl text-sm">↺</button>
+        </div>
+      </div>
+
+      <!-- Quick Duration -->
+      <div class="fade-in">
+        <p class="text-sm text-gray-400 mb-2">Quick set duration</p>
+        <div class="flex gap-2 flex-wrap">
+          <button data-cycle-min="20" class="bg-white/10 hover:bg-cyan-500/20 px-4 py-2 rounded-xl text-sm transition">20 min</button>
+          <button data-cycle-min="30" class="bg-white/10 hover:bg-cyan-500/20 px-4 py-2 rounded-xl text-sm transition">30 min</button>
+          <button data-cycle-min="40" class="bg-white/10 hover:bg-cyan-500/20 px-4 py-2 rounded-xl text-sm transition">40 min</button>
+          <button data-cycle-min="45" class="bg-cyan-500/20 border border-cyan-500/40 px-4 py-2 rounded-xl text-sm transition">45 min</button>
+          <button data-cycle-min="50" class="bg-white/10 hover:bg-cyan-500/20 px-4 py-2 rounded-xl text-sm transition">50 min</button>
+          <button data-cycle-min="60" class="bg-white/10 hover:bg-cyan-500/20 px-4 py-2 rounded-xl text-sm transition">60 min</button>
+        </div>
+      </div>
+
+      <!-- Manual Input -->
+      <div class="glass rounded-2xl p-4 fade-in">
+        <label class="text-sm text-gray-400">Or enter minutes manually</label>
+        <input id="cycle-manual-min" type="number" min="1" max="180" value="45"
+          class="w-full mt-2 bg-white/10 rounded-xl px-4 py-3 text-white text-lg font-bold outline-none focus:ring-2 focus:ring-cyan-500">
+      </div>
+
+      <!-- Intensity -->
+      <div class="glass rounded-2xl p-4 fade-in">
+        <label class="text-sm text-gray-400">Intensity Level</label>
+        <select id="cycle-intensity"
+          class="w-full mt-2 input-dark rounded-xl px-4 py-3 text-lg outline-none focus:ring-2 focus:ring-cyan-500 appearance-none">
+          <option value="light">Easy Pace (Light)</option>
+          <option value="moderate" selected>Steady Effort (Moderate)</option>
+          <option value="vigorous">Hard Push (Vigorous)</option>
+          <option value="intense">Beast Mode (Intense)</option>
+        </select>
+      </div>
+
+      <!-- Estimates -->
+      <div class="glass rounded-2xl p-5 fade-in">
+        <h3 class="font-display font-semibold mb-4 flex items-center gap-2"><span data-icon="activity" data-size="18"></span> Session Estimates</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-pink-500/10 rounded-xl p-3 text-center">
+            <p class="text-3xl font-bold text-pink-400" id="cycle-est-calories">0</p>
+            <p class="text-xs text-gray-400">Calories Burned</p>
+          </div>
+          <div class="bg-cyan-500/10 rounded-xl p-3 text-center">
+            <p class="text-3xl font-bold text-cyan-400" id="cycle-est-minutes">0</p>
+            <p class="text-xs text-gray-400">Minutes</p>
+          </div>
+          <div class="bg-purple-500/10 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-purple-400" id="cycle-est-distance">0</p>
+            <p class="text-xs text-gray-400">km (est.)</p>
+          </div>
+          <div class="bg-lime-500/10 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-lime-400" id="cycle-est-fat">0</p>
+            <p class="text-xs text-gray-400">Fat Burn kcal</p>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-3 text-center">Intensity: <span id="cycle-est-intensity" class="text-cyan-400">Steady Effort</span> · Based on <span id="cycle-base-weight" class="text-white">103</span> kg</p>
+      </div>
+
+      <!-- Save -->
+      <button id="cycle-save" class="btn-cyan w-full text-white font-bold py-4 rounded-2xl text-lg fade-in flex items-center justify-center gap-2">
+        <span data-icon="save" data-size="20"></span> Save Cycle Session
+      </button>
+    </section>
+
+    <!-- ═══ HOME WORKOUT ═══ -->
+    <section data-panel="workout" class="hidden px-5 pt-4 space-y-5">
+
+      <!-- Preview -->
+      <div id="workout-preview">
+        <div class="fade-in">
+          <h2 class="text-2xl font-bold font-display flex items-center gap-2"><span data-icon="dumbbell" data-size="24"></span> Home Workout</h2>
+          <p class="text-sm text-secondary mt-1">30 unique programs · zero equipment · tap to swap days</p>
+        </div>
+
+        <!-- 7-day preview strip -->
+        <div class="fade-in mt-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-semibold text-secondary uppercase tracking-wider">Your Week Ahead</h3>
+            <span id="month-phase-badge" class="month-badge">Foundation</span>
+          </div>
+          <div id="week-preview" class="week-preview-scroll scrollbar-hide"></div>
+          <p class="swap-hint mt-3">Tap any upcoming day to swap workouts with today. Each workout appears once per week.</p>
+        </div>
+
+        <div id="preview-card" class="glass rounded-2xl p-5 neon-border mt-5 fade-in workout-hero">
+          <div id="preview-accent" class="workout-hero-accent accent-orange"></div>
+          <div class="workout-hero-body">
+            <div class="flex items-start gap-4">
+              <span id="preview-icon" class="float text-pink-400 p-2.5 bg-white/5 rounded-2xl"></span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 id="preview-name" class="font-display text-xl font-bold text-white">Leg Day Destroyer</h3>
+                  <span id="preview-week" class="text-xs bg-white/10 px-2.5 py-1 rounded-full text-secondary">Week 1</span>
+                </div>
+                <p id="preview-tagline" class="text-sm text-secondary mt-1.5">Build power from the ground up</p>
+                <p id="preview-focus" class="text-xs text-lime-400 mt-2 font-medium">Lower Body + Cardio</p>
+              </div>
+            </div>
+            <div class="flex gap-3 mt-5">
+              <div class="flex-1 workout-stat-box">
+                <p id="preview-duration" class="workout-stat-value">45 min</p>
+                <p class="workout-stat-label">Duration</p>
+              </div>
+              <div class="flex-1 workout-stat-box">
+                <p id="preview-exercises" class="workout-stat-value">18 exercises</p>
+                <p class="workout-stat-label">Movements</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button id="workout-start-btn" class="btn-neon w-full text-white font-bold py-4 rounded-2xl text-lg mt-5 pulse-glow flex items-center justify-center gap-2">
+          <span data-icon="flame" data-size="22"></span> START WORKOUT
+        </button>
+      </div>
+
+      <!-- Active Player -->
+      <div id="workout-player" class="hidden space-y-4">
+        <div id="wp-coach-wrap" class="coach-panel">
+          <div class="coach-avatar-col">
+            <div class="coach-avatar-ring" aria-hidden="true"></div>
+            <div class="coach-avatar">
+              <span data-icon="activity" data-size="20"></span>
+            </div>
+            <div class="coach-waves" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="coach-bubble">
+            <p class="coach-label">Coach Maya</p>
+            <p id="wp-coach" class="coach-text">Your coach is ready, Fahad.</p>
+          </div>
+        </div>
+
+        <!-- Overall Progress -->
+        <div class="glass rounded-xl p-3">
+          <div class="flex justify-between text-xs text-gray-400 mb-1">
+            <span>Overall Progress</span>
+            <span>Elapsed: <span id="wp-elapsed" class="text-white">0:00</span></span>
+          </div>
+          <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div id="wp-overall-bar" class="h-full bg-gradient-to-r from-pink-500 to-cyan-400 rounded-full transition-all duration-1000" style="width:0%"></div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1 text-center">Exercise <span id="wp-progress">1 / 18</span></p>
+        </div>
+
+        <!-- Phase & Timer (work only — hidden during rest) -->
+        <div id="wp-phase-timer-block" class="text-center">
+          <p id="wp-phase" class="text-sm font-bold uppercase tracking-widest text-lime-400">GO!</p>
+          <p id="wp-timer" class="timer-display text-7xl font-bold font-display neon-text my-2">0:45</p>
+          <p id="wp-next" class="text-xs text-gray-400"></p>
+          <div class="flex justify-center gap-8 mt-3 text-sm">
+            <div class="text-center">
+              <p id="wp-live-cal" class="font-bold text-pink-400 text-lg">0</p>
+              <p class="text-xs text-gray-400">kcal live</p>
+            </div>
+            <div class="text-center">
+              <p id="wp-done-count" class="font-bold text-lime-400 text-lg">0</p>
+              <p class="text-xs text-gray-400">exercises done</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise Demo (work phase only) -->
+        <div id="wp-exercise-card" class="glass rounded-2xl p-3 neon-border overflow-hidden">
+          <div id="wp-media" class="exercise-media-container"></div>
+          <h3 id="wp-name" class="font-display text-xl font-bold text-center mt-3 px-2">Push Ups</h3>
+          <p id="wp-muscles" class="text-xs text-cyan-400 text-center">Chest, Triceps</p>
+          <p id="wp-tips" class="text-sm text-gray-400 text-center mt-2 italic">Keep body straight</p>
+        </div>
+
+        <!-- Rest & Breathe (rest phase only) -->
+        <div id="wp-rest-card" class="rest-panel neon-border hidden">
+          <div class="rest-accent-stripe" aria-hidden="true"></div>
+          <div class="rest-panel-inner">
+            <div class="rest-top">
+              <span class="rest-label">REST</span>
+              <h3 class="rest-title font-display">Rest &amp; Breathe</h3>
+            </div>
+
+            <div class="rest-breath-scene">
+              <svg class="rest-timer-ring" viewBox="0 0 120 120" aria-hidden="true">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+                <circle id="wp-rest-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#restGrad)" stroke-width="4" stroke-linecap="round" class="rest-ring-progress"/>
+                <defs>
+                  <linearGradient id="restGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00f5ff"/>
+                    <stop offset="100%" stop-color="#a855f7"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="rest-breath-orb" id="wp-breath-orb">
+                <span id="wp-rest-timer-inner" class="rest-timer-inner font-display">0:30</span>
+              </div>
+            </div>
+
+            <p id="wp-breath-cue" class="rest-breath-cue">Inhale slowly</p>
+
+            <p id="wp-rest-done" class="rest-done-line">Jumping Jacks — done</p>
+
+            <div class="rest-next-line">
+              <span class="rest-next-prefix">Next up</span>
+              <span id="wp-rest-next-name" class="rest-next-name">High Knees</span>
+              <span id="wp-rest-next-muscles" class="rest-next-muscles">Legs, Core</span>
+            </div>
+
+            <div id="wp-rest-controls" class="hidden rest-controls-row">
+              <button id="rest-add-15" class="rest-extend-btn">+15 sec</button>
+              <button id="rest-add-30" class="rest-extend-btn">+30 sec</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress bar for current exercise -->
+        <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
+          <div id="wp-progress-bar" class="h-full bg-lime-400 rounded-full transition-all" style="width:5%"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex gap-2">
+          <button id="workout-previous-btn" class="hidden bg-purple-500/20 border border-purple-500/40 text-purple-300 font-bold py-3 px-3 rounded-xl flex items-center justify-center gap-1 text-sm" title="Go back to previous exercise">
+            <span data-icon="chevL" data-size="16"></span> Back
+          </button>
+          <button id="workout-pause-btn" class="flex-1 bg-white/10 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2"><span data-icon="pause" data-size="16"></span> Pause</button>
+          <button id="workout-skip-btn" class="flex-1 bg-white/10 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2"><span data-icon="skip" data-size="16"></span> Skip</button>
+          <button id="workout-quit-btn" class="bg-red-500/20 text-red-400 font-bold py-3 px-4 rounded-xl flex items-center"><span data-icon="x" data-size="18"></span></button>
+        </div>
+      </div>
+
+      <!-- Complete -->
+      <div id="workout-complete" class="hidden text-center space-y-5 fade-in">
+        <div class="flex justify-center text-yellow-400 float"><span data-icon="trophy" data-size="56"></span></div>
+        <h2 class="text-3xl font-bold font-display neon-text">CRUSHED IT!</h2>
+        <p id="wc-subtitle" class="text-gray-400">Another step closer to 80kg, Fahad!</p>
+        <p id="wc-coach-msg" class="text-sm text-cyan-300/90 italic px-2 leading-snug"></p>
+        <div class="glass rounded-2xl p-6 neon-border">
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <p id="wc-calories" class="text-3xl font-bold text-pink-400">0</p>
+              <p class="text-xs text-gray-400">kcal</p>
+            </div>
+            <div>
+              <p id="wc-duration" class="text-3xl font-bold text-cyan-400">0</p>
+              <p class="text-xs text-gray-400">minutes</p>
+            </div>
+            <div>
+              <p id="wc-exercises" class="text-3xl font-bold text-lime-400">0</p>
+              <p class="text-xs text-gray-400">exercises</p>
+            </div>
+          </div>
+        </div>
+        <button id="workout-done-btn" class="btn-lime w-full font-bold py-4 rounded-2xl text-lg flex items-center justify-center gap-2"><span data-icon="check" data-size="20"></span> Done</button>
+      </div>
+    </section>
+
+    <!-- ═══ HISTORY ═══ -->
+    <section data-panel="history" class="hidden px-5 pt-4 space-y-5">
+
+      <div class="fade-in">
+        <h2 class="text-2xl font-bold font-display flex items-center gap-2"><span data-icon="chart" data-size="24"></span> History</h2>
+        <p class="text-sm text-gray-400 mt-1">Your fitness journey log</p>
+      </div>
+
+      <!-- Calendar -->
+      <div class="glass rounded-2xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-3">
+          <button id="cal-prev" class="text-gray-400 hover:text-white px-2 flex items-center"><span data-icon="chevL" data-size="20"></span></button>
+          <h3 id="calendar-month" class="font-display font-semibold">Jun 2026</h3>
+          <button id="cal-next" class="text-gray-400 hover:text-white px-2 flex items-center"><span data-icon="chevR" data-size="20"></span></button>
+        </div>
+        <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
+        <div class="flex gap-4 mt-3 text-xs text-gray-400 justify-center">
+          <span class="flex items-center gap-1"><span data-icon="bike" data-size="14"></span> Cycle</span>
+          <span class="flex items-center gap-1"><span data-icon="dumbbell" data-size="14"></span> Workout</span>
+          <span class="ring-1 ring-lime-400 px-1 rounded">Today</span>
+        </div>
+      </div>
+
+      <!-- Day Detail -->
+      <div id="day-detail" class="fade-in"></div>
+
+      <!-- Weight Chart -->
+      <div class="glass rounded-2xl p-4 fade-in">
+        <h3 class="font-display font-semibold mb-3 flex items-center gap-2"><span data-icon="scale" data-size="18"></span> Weight Trend</h3>
+        <div id="weight-chart"></div>
+      </div>
+
+      <!-- Recent Logs -->
+      <div class="fade-in">
+        <h3 class="font-display font-semibold mb-3">Recent Sessions</h3>
+        <div id="history-list" class="space-y-3"></div>
+      </div>
+
+    </section>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <section data-panel="settings" class="hidden px-5 pt-4 space-y-5">
+
+      <div class="fade-in">
+        <h2 class="text-2xl font-bold font-display flex items-center gap-2"><span data-icon="settings" data-size="24"></span> Settings</h2>
+        <p class="text-sm text-gray-400 mt-1">Profile, goals, and data</p>
+      </div>
+
+      <div id="settings-summary" class="settings-summary glass rounded-2xl p-4 fade-in"></div>
+
+      <div id="settings-panel" class="glass rounded-2xl p-4 fade-in space-y-3">
+        <h3 class="font-display font-semibold flex items-center gap-2"><span data-icon="user" data-size="18"></span> Profile</h3>
+        <p class="text-xs text-gray-400">Updates your dashboard, calorie targets, and Coach Maya. Log your weight here each morning.</p>
+        <div class="settings-grid">
+          <label class="settings-field">
+            <span class="settings-label">Name</span>
+            <input id="settings-name" type="text" maxlength="32" class="settings-input" placeholder="Fahad">
+          </label>
+          <label class="settings-field">
+            <span class="settings-label">Current weight (kg)</span>
+            <input id="settings-current-weight" type="number" step="0.1" min="40" max="200" class="settings-input">
+          </label>
+          <label class="settings-field">
+            <span class="settings-label">Start weight (kg)</span>
+            <input id="settings-start-weight" type="number" step="0.1" min="40" max="200" class="settings-input">
+          </label>
+          <label class="settings-field">
+            <span class="settings-label">Target weight (kg)</span>
+            <input id="settings-target-weight" type="number" step="0.1" min="40" max="200" class="settings-input">
+          </label>
+          <label class="settings-field">
+            <span class="settings-label">Height (cm)</span>
+            <input id="settings-height" type="number" step="1" min="120" max="230" class="settings-input">
+          </label>
+          <label class="settings-field settings-field-full">
+            <span class="settings-label">Journey start date</span>
+            <input id="settings-start-date" type="date" class="settings-input">
+          </label>
+        </div>
+        <button id="settings-save-btn" class="btn-cyan w-full text-white font-bold py-3 rounded-xl text-sm">Save Profile</button>
+      </div>
+
+      <div class="glass rounded-2xl p-4 fade-in space-y-3">
+        <h3 class="font-display font-semibold flex items-center gap-2"><span data-icon="save" data-size="18"></span> Your Data</h3>
+        <p class="text-xs text-gray-400">All data stored locally on your device as JSON. Export anytime for backup.</p>
+        <div class="flex gap-3">
+          <button id="export-btn" class="flex-1 bg-cyan-500/20 text-cyan-400 font-bold py-3 rounded-xl text-sm">Export JSON</button>
+          <button id="import-btn" class="flex-1 bg-purple-500/20 text-purple-400 font-bold py-3 rounded-xl text-sm">Import JSON</button>
+        </div>
+        <input id="import-file" type="file" accept=".json" class="hidden">
+        <button id="clear-btn" class="w-full bg-red-500/10 text-red-400 py-2 rounded-xl text-xs">Clear All Data</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass-strong border-t border-white/10 nav-bottom z-50">
+    <div class="nav-inner max-w-lg mx-auto flex justify-around py-2">
+      <button data-tab="home" class="tab-active flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition border border-transparent">
+        <span data-icon="home" data-size="22" class="nav-icon nav-icon-active"></span>
+        <span class="text-xs">Home</span>
+      </button>
+      <button data-tab="cycle" class="flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition border border-transparent text-gray-400">
+        <span data-icon="bike" data-size="22" class="nav-icon"></span>
+        <span class="text-xs">Cycle</span>
+      </button>
+      <button data-tab="workout" class="flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition border border-transparent text-gray-400">
+        <span data-icon="dumbbell" data-size="22" class="nav-icon"></span>
+        <span class="text-xs">Workout</span>
+      </button>
+      <button data-tab="history" class="flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition border border-transparent text-gray-400">
+        <span data-icon="chart" data-size="22" class="nav-icon"></span>
+        <span class="text-xs">History</span>
+      </button>
+      <button data-tab="settings" class="flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition border border-transparent text-gray-400">
+        <span data-icon="settings" data-size="22" class="nav-icon"></span>
+        <span class="text-xs">Settings</span>
+      </button>
+    </div>
+  </nav>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

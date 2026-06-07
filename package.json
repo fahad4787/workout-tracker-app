@@ -1,0 +1,16 @@
+{
+  "name": "fahadfit",
+  "private": true,
+  "scripts": {
+    "build:fonts": "mkdir -p css/fonts && cp node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2 node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-italic.woff2 node_modules/@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2 css/fonts/",
+    "build:css": "tailwindcss -i ./css/tailwind.input.css -o ./css/tailwind.css --minify",
+    "build": "npm run build:fonts && npm run build:css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  },
+  "dependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
+    "@fontsource-variable/unbounded": "^5.2.8"
+  }
+}
