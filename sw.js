@@ -1,12 +1,13 @@
 /**
  * FahadFit service worker — offline app shell
  */
-const CACHE = 'fahadfit-v6';
+const CACHE = 'fahadfit-v7';
 
 const PRECACHE = [
   './',
   './index.html',
   './manifest.json',
+  './icons/icon.svg',
   './css/tailwind.css',
   './css/custom.css',
   './css/fonts/plus-jakarta-sans-latin-wght-normal.woff2',
